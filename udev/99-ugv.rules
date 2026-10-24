@@ -1,0 +1,7 @@
+# Stable device name for the RPLIDAR A1 on the Raspberry Pi: /dev/ugv_lidar
+# The A1's USB adapter uses a CP2102 chip (10c4:ea60).
+# (The ESP32 talks to the Pi over the GPIO UART /dev/ttyAMA0, so it needs no rule.)
+# install.sh installs this automatically; manual install:
+#   sudo cp 99-ugv.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="ugv_lidar", MODE="0666"

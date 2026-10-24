@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+<!-- Semi-structured indoor arena (8 m x 6 m) with walls, cylinders and blocks.
+     The robot spawns at the origin (0, 0), which is inside the arena. -->
+<sdf version="1.6">
+  <world name="ugv_arena">
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+
+    <physics type="ode">
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+    </physics>
+
+    <model name="arena">
+      <static>true</static>
+
+      <!-- Outer walls: arena spans x [-2, 6], y [-3, 3] -->
+      <link name="wall_north">
+        <pose>2 3 0.25 0 0 0</pose>
+        <collision name="c"><geometry><box><size>8.2 0.1 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+      <link name="wall_south">
+        <pose>2 -3 0.25 0 0 0</pose>
+        <collision name="c"><geometry><box><size>8.2 0.1 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>8.2 0.1 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+      <link name="wall_east">
+        <pose>6 0 0.25 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.1 6 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.1 6 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+      <link name="wall_west">
+        <pose>-2 0 0.25 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.1 6 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.1 6 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Grey</name></script></material></visual>
+      </link>
+
+      <!-- Partition wall with a gap, forces the planner to route around -->
+      <link name="partition">
+        <pose>2 -1 0.25 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.1 4 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.1 4 0.5</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Wood</name></script></material></visual>
+      </link>
+
+      <!-- Cylindrical obstacles -->
+      <link name="cyl_1">
+        <pose>0.8 1.6 0.25 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Red</name></script></material></visual>
+      </link>
+      <link name="cyl_2">
+        <pose>3.5 2.0 0.25 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Red</name></script></material></visual>
+      </link>
+      <link name="cyl_3">
+        <pose>4.5 -1.5 0.25 0 0 0</pose>
+        <collision name="c"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.15</radius><length>0.5</length></cylinder></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Red</name></script></material></visual>
+      </link>
+
+      <!-- Static blocks -->
+      <link name="block_1">
+        <pose>-0.8 -1.8 0.2 0 0 0.4</pose>
+        <collision name="c"><geometry><box><size>0.6 0.4 0.4</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.6 0.4 0.4</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Orange</name></script></material></visual>
+      </link>
+      <link name="block_2">
+        <pose>4.8 0.8 0.2 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.5 0.5 0.4</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.5 0.5 0.4</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Orange</name></script></material></visual>
+      </link>
+      <link name="block_3">
+        <pose>3.0 -2.3 0.2 0 0 0</pose>
+        <collision name="c"><geometry><box><size>0.8 0.3 0.4</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.8 0.3 0.4</size></box></geometry>
+          <material><script><uri>file://media/materials/scripts/gazebo.material</uri><name>Gazebo/Orange</name></script></material></visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>

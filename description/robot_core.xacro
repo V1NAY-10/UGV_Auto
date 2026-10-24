@@ -4,142 +4,108 @@
   <!-- Include inertia macros -->
   <xacro:include filename="inertial_macros.xacro"/>
 
+  <!-- ===== Dimensions (measure your chassis and edit these) ===== -->
+  <xacro:property name="chassis_length" value="0.26"/>
+  <xacro:property name="chassis_width"  value="0.16"/>
+  <xacro:property name="chassis_height" value="0.045"/>
+  <xacro:property name="chassis_mass"   value="1.5"/>
+
+  <xacro:property name="wheel_radius" value="0.0635"/> <!-- 127 mm wheel -> radius 63.5 mm -->
+  <xacro:property name="wheel_width"  value="0.03"/>
+  <xacro:property name="wheel_mass"   value="0.1"/>
+  <xacro:property name="wheel_x"      value="0.09"/>   <!-- front/rear axle offset from centre -->
+  <xacro:property name="wheel_y"      value="${chassis_width/2 + wheel_width/2 + 0.005}"/>
+  <!-- Chassis bottom sits this high above the wheel axles -->
+  <xacro:property name="chassis_z"    value="0.01"/>
+
   <!-- Materials -->
   <material name="black"><color rgba="0 0 0 1"/></material>
   <material name="grey"><color rgba="0.6 0.6 0.6 1"/></material>
   <material name="blue"><color rgba="0.1 0.3 1 1"/></material>
 
-  <!-- Base link -->
-  <link name="base_link" />
+  <!-- Base link: centre of the robot, at wheel axle height -->
+  <link name="base_link"/>
+
+  <!-- Footprint: projection of base_link on the ground (used by Nav2) -->
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+    <origin xyz="0 0 ${-wheel_radius}"/>
+  </joint>
+  <link name="base_footprint"/>
 
   <!-- Chassis -->
   <joint name="chassis_joint" type="fixed">
     <parent link="base_link"/>
     <child link="chassis"/>
-    <origin xyz="0 0 0"/>
+    <origin xyz="0 0 ${chassis_z}"/>
   </joint>
 
   <link name="chassis">
-    <!-- Visual -->
     <visual>
-      <origin xyz="0 0 0.022"/>
+      <origin xyz="0 0 ${chassis_height/2}"/>
       <geometry>
-        <box size="0.26 0.16 0.045"/>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
       </geometry>
       <material name="grey"/>
     </visual>
-
-    <!-- Collision -->
     <collision>
-      <origin xyz="0 0 0.022"/>
+      <origin xyz="0 0 ${chassis_height/2}"/>
       <geometry>
-        <box size="0.26 0.16 0.045"/>
+        <box size="${chassis_length} ${chassis_width} ${chassis_height}"/>
       </geometry>
     </collision>
-
-    <!-- Inertia -->
-    <xacro:inertial_box mass="1.0" x="0.26" y="0.16" z="0.045">
-      <origin xyz="0 0 0.022"/>
+    <xacro:inertial_box mass="${chassis_mass}" x="${chassis_length}" y="${chassis_width}" z="${chassis_height}">
+      <origin xyz="0 0 ${chassis_height/2}"/>
     </xacro:inertial_box>
   </link>
 
-  <!-- WHEELS (4 Wheels) -->
-  <!-- Wheel params -->
-  <xacro:property name="wheel_radius" value="0.0635"/> <!-- 5 inch = 127mm -> radius=63.5mm -->
-  <xacro:property name="wheel_width" value="0.03"/>
+  <gazebo reference="chassis">
+    <material>Gazebo/Grey</material>
+  </gazebo>
 
-  <!-- Front-left wheel -->
-  <joint name="front_left_wheel_joint" type="continuous">
-    <parent link="base_link"/>
-    <child link="front_left_wheel"/>
-    <origin xyz="0.10 0.08 -0.03175" rpy="0 0 ${pi/2}"/>
-    <axis xyz="0 0 1"/>
-  </joint>
+  <!-- ===== WHEELS (4WD skid steer, non-encoded DC motors) ===== -->
+  <!-- prefix: front_left etc.  x/y: position  -->
+  <xacro:macro name="wheel" params="prefix x y">
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel"/>
+      <!-- Roll the cylinder so its axis points along +Y -->
+      <origin xyz="${x} ${y} 0" rpy="${-pi/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
 
-  <link name="front_left_wheel">
-    <visual>
-      <geometry>
-        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
-      </geometry>
-      <material name="blue"/>
-    </visual>
-    <collision>
-      <geometry>
-        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
-      </geometry>
-    </collision>
-    <xacro:inertial_cylinder mass="0.1"
-                             radius="${wheel_radius}"
-                             length="${wheel_width}">
-      <origin xyz="0 0 0"/>
-    </xacro:inertial_cylinder>
-  </link>
+    <link name="${prefix}_wheel">
+      <visual>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+        <material name="blue"/>
+      </visual>
+      <collision>
+        <geometry>
+          <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+        </geometry>
+      </collision>
+      <xacro:inertial_cylinder mass="${wheel_mass}" length="${wheel_width}" radius="${wheel_radius}">
+        <origin xyz="0 0 0"/>
+      </xacro:inertial_cylinder>
+    </link>
 
-  <!-- Front-right wheel -->
-  <joint name="front_right_wheel_joint" type="continuous">
-    <parent link="base_link"/>
-    <child link="front_right_wheel"/>
-    <origin xyz="0.10 -0.08 -0.03175" rpy="0 0 ${pi/2}"/>
-    <axis xyz="0 0 -1"/>
-  </joint>
+    <gazebo reference="${prefix}_wheel">
+      <material>Gazebo/Blue</material>
+      <!-- Skid steer needs some lateral slip to turn in place -->
+      <mu1>1.0</mu1>
+      <mu2>0.5</mu2>
+      <kp>1e6</kp>
+      <kd>100.0</kd>
+      <minDepth>0.001</minDepth>
+    </gazebo>
+  </xacro:macro>
 
-  <link name="front_right_wheel">
-    <visual>
-      <geometry>
-        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
-      </geometry>
-      <material name="blue"/>
-    </visual>
-  </link>
-
-  <!-- Rear-left wheel -->
-  <joint name="rear_left_wheel_joint" type="continuous">
-    <parent link="base_link"/>
-    <child link="rear_left_wheel"/>
-    <origin xyz="-0.10 0.08 -0.03175" rpy="0 0 ${pi/2}"/>
-    <axis xyz="0 0 1"/>
-  </joint>
-
-  <link name="rear_left_wheel">
-    <visual>
-      <geometry>
-        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
-      </geometry>
-      <material name="blue"/>
-    </visual>
-  </link>
-
-  <!-- Rear-right wheel -->
-  <joint name="rear_right_wheel_joint" type="continuous">
-    <parent link="base_link"/>
-    <child link="rear_right_wheel"/>
-    <origin xyz="-0.10 -0.08 -0.03175" rpy="0 0 ${pi/2}"/>
-    <axis xyz="0 0 -1"/>
-  </joint>
-
-  <link name="rear_right_wheel">
-    <visual>
-      <geometry>
-        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
-      </geometry>
-      <material name="blue"/>
-    </visual>
-  </link>
-
-  <!-- LIDAR -->
-  <joint name="lidar_joint" type="fixed">
-    <parent link="base_link"/>
-    <child link="lidar_link"/>
-    <origin xyz="0 0 0.08"/>
-  </joint>
-
-  <link name="lidar_link">
-    <visual>
-      <geometry>
-        <cylinder radius="0.03" length="0.03"/>
-      </geometry>
-      <material name="black"/>
-    </visual>
-  </link>
+  <xacro:wheel prefix="front_left"  x="${wheel_x}"  y="${wheel_y}"/>
+  <xacro:wheel prefix="front_right" x="${wheel_x}"  y="${-wheel_y}"/>
+  <xacro:wheel prefix="rear_left"   x="${-wheel_x}" y="${wheel_y}"/>
+  <xacro:wheel prefix="rear_right"  x="${-wheel_x}" y="${-wheel_y}"/>
 
 </robot>

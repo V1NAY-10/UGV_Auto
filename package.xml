@@ -1,13 +1,40 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>my_bot</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="my_email@email.com">MY NAME</maintainer>
-  <license>TODO: License declaration</license>
+  <name>ugv_auto</name>
+  <version>1.0.0</version>
+  <description>Autonomous navigation and mapping for a 4WD LiDAR UGV (Raspberry Pi 4B + ESP32 + L298N): Gazebo simulation, slam_toolbox SLAM and Nav2 point-to-point navigation.</description>
+  <maintainer email="todo@example.com">Kushal Deshmukh, Vinay Gupta, Soham Jadhav</maintainer>
+  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Robot description -->
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+
+  <!-- Simulation -->
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_plugins</exec_depend>
+
+  <!-- SLAM + navigation -->
+  <exec_depend>slam_toolbox</exec_depend>
+  <exec_depend>navigation2</exec_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_simple_commander</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>teleop_twist_keyboard</exec_depend>
+
+  <!-- Python nodes -->
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>python3-serial</exec_depend>
+
+  <!-- Real robot only, built from source (see README):
+       rplidar_ros (Slamtec, ros2 branch) and rf2o_laser_odometry. install.sh pi clones both. -->
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

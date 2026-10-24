@@ -1,0 +1,16 @@
+# esp32_bridge.py: /cmd_vel -> left/right PWM over the Pi's GPIO UART to the ESP32
+# The motors have no encoders, so this is an open-loop velocity -> PWM map.
+# Calibrate max_wheel_speed and min_pwm on your robot (see README "Calibration").
+esp32_bridge:
+  ros__parameters:
+    port: /dev/ttyAMA0       # Pi GPIO14/15 UART (needs dtoverlay=disable-bt, see install.sh)
+    baud: 115200
+    wheel_separation: 0.20   # left-right wheel centre distance (m), = 2*wheel_y in the URDF
+    # Skid steer slips sideways when turning, so it needs more differential
+    # than an ideal diff drive. Increase if the robot under-rotates.
+    turn_gain: 1.6
+    max_wheel_speed: 1.2     # m/s reached at max_pwm (measure on the ground)
+    min_pwm: 90              # lowest PWM that still moves the robot (L298N drop + friction)
+    max_pwm: 255
+    cmd_timeout: 0.5         # stop motors if /cmd_vel goes quiet (s)
+    rate: 20.0               # serial send rate (Hz)
